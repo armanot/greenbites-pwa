@@ -1,16 +1,84 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
+const sampleMeals = [
+  {
+    name: 'Nasi ayam goreng',
+    calories: 680,
+    cost: 12,
+    impact: 'Weight Gain Likely',
+    suggestions: [
+      'Kurangkan nasi sedikit',
+      'Elakkan air manis',
+      'Tambah sayur jika ada',
+    ],
+  },
+  {
+    name: 'Nasi campur ayam dan sayur',
+    calories: 540,
+    cost: 10,
+    impact: 'Slightly Above Target',
+    suggestions: [
+      'Pilih lauk bakar jika ada',
+      'Kurangkan kuah manis',
+      'Tambah air kosong',
+    ],
+  },
+  {
+    name: 'Mee goreng',
+    calories: 620,
+    cost: 9,
+    impact: 'High Carb Meal',
+    suggestions: [
+      'Ambil portion sederhana',
+      'Elakkan minuman bergula',
+      'Seimbangkan dengan buah selepas itu',
+    ],
+  },
+]
+
 export default function SnapResult() {
   const navigate = useNavigate()
   const [imageUrl, setImageUrl] = useState('')
+  const [mealData, setMealData] = useState(sampleMeals[0])
 
   useEffect(() => {
     const storedImage = sessionStorage.getItem('greenbites_uploaded_image')
     if (storedImage) {
       setImageUrl(storedImage)
     }
+
+    const randomMeal =
+      sampleMeals[Math.floor(Math.random() * sampleMeals.length)]
+    setMealData(randomMeal)
   }, [])
+
+  const handleRetake = () => {
+    sessionStorage.removeItem('greenbites_uploaded_image')
+    sessionStorage.removeItem('greenbites_uploaded_image_name')
+    navigate('/')
+  }
+
+  const handleLogMeal = () => {
+    const currentCalories = Number(
+      localStorage.getItem('greenbites_today_calories') || 1180
+    )
+    const currentBudget = Number(
+      localStorage.getItem('greenbites_today_budget') || 22
+    )
+
+    localStorage.setItem(
+      'greenbites_today_calories',
+      currentCalories + mealData.calories
+    )
+    localStorage.setItem(
+      'greenbites_today_budget',
+      currentBudget + mealData.cost
+    )
+
+    alert('Meal logged successfully.')
+    navigate('/')
+  }
 
   return (
     <div className="page">
@@ -21,7 +89,7 @@ export default function SnapResult() {
       <div className="card">
         <div className="brand">GreenBites</div>
         <h1>Analisis Makanan</h1>
-        <p>Ini ialah paparan awal selepas gambar diambil.</p>
+        <p>Detected meal: {mealData.name}</p>
       </div>
 
       <div className="card">
@@ -39,33 +107,40 @@ export default function SnapResult() {
       <div className="stats-grid">
         <div className="stat-card danger">
           <div className="stat-title">Kalori</div>
-          <div className="stat-value">680 kcal</div>
+          <div className="stat-value">{mealData.calories}</div>
           <div className="stat-note">Above Target</div>
         </div>
 
         <div className="stat-card warning">
           <div className="stat-title">Kos</div>
-          <div className="stat-value">RM 12</div>
+          <div className="stat-value">RM {mealData.cost}</div>
           <div className="stat-note">Within Budget</div>
         </div>
 
         <div className="stat-card success">
           <div className="stat-title">Impak</div>
-          <div className="stat-value">Berat</div>
-          <div className="stat-note">Weight Gain Likely</div>
+          <div className="stat-value small-text">Berat</div>
+          <div className="stat-note">{mealData.impact}</div>
         </div>
       </div>
 
       <div className="card">
         <h2>Cadangan</h2>
         <ul className="suggestion-list">
-          <li>Kurangkan nasi sedikit</li>
-          <li>Elakkan air manis</li>
-          <li>Tambah sayur jika ada</li>
+          {mealData.suggestions.map((item, index) => (
+            <li key={index}>{item}</li>
+          ))}
         </ul>
       </div>
 
-      <button className="snap-button">Log Meal</button>
+      <div className="action-row">
+        <button className="secondary-button" onClick={handleRetake}>
+          Retake
+        </button>
+        <button className="snap-button half-button" onClick={handleLogMeal}>
+          Log Meal
+        </button>
+      </div>
     </div>
   )
 }

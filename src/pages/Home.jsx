@@ -17,7 +17,7 @@ export default function Home() {
     sessionStorage.setItem('greenbites_uploaded_image', imageUrl)
     sessionStorage.setItem('greenbites_uploaded_image_name', file.name)
 
-    navigate('/snap-result')
+    navigate('/scanning')
   }
 
   return (

@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Home from './pages/Home.jsx'
+import ScanningScreen from './pages/ScanningScreen.jsx'
 import SnapResult from './pages/SnapResult.jsx'
 
 export default function App() {
@@ -7,6 +8,7 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/scanning" element={<ScanningScreen />} />
         <Route path="/snap-result" element={<SnapResult />} />
       </Routes>
     </BrowserRouter>
