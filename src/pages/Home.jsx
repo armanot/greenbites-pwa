@@ -64,7 +64,7 @@ export default function Home() {
   }
 
   const handleReset = () => {
-    const confirmed = window.confirm('Reset semua data hari ini?')
+    const confirmed = window.confirm('Reset all of today’s data?')
     if (!confirmed) return
 
     localStorage.removeItem('greenbites_today_calories')
@@ -76,8 +76,11 @@ export default function Home() {
     setRecentMeals([])
   }
 
-  const caloriePercentRaw = (calories / 1800) * 100
-  const budgetPercentRaw = (budget / 30) * 100
+  const calorieTarget = 1800
+  const budgetTarget = 30
+
+  const caloriePercentRaw = (calories / calorieTarget) * 100
+  const budgetPercentRaw = (budget / budgetTarget) * 100
 
   const caloriePercent = Math.min(caloriePercentRaw, 100)
   const budgetPercent = Math.min(budgetPercentRaw, 100)
@@ -100,34 +103,34 @@ export default function Home() {
 
   const getCoachMessage = () => {
     if (calories > 3000) {
-      return '⚠️ You are significantly over your calorie target today. Skip heavy dinner and choose light meals like soup, fruits, or salad.'
+      return 'You are significantly over your calorie target today. Choose a much lighter next meal such as soup, fruit, or salad.'
     }
 
-    if (calories > 1800) {
-      return '⚠️ You exceeded your calorie target. Try lighter meals for the rest of the day.'
+    if (calories > calorieTarget) {
+      return 'You are over your calorie target today. Consider a lighter next meal to rebalance your intake.'
     }
 
-    if (budget > 30) {
-      return '💸 You exceeded your food budget today. Consider simpler or home-cooked meals next.'
+    if (budget > budgetTarget) {
+      return 'You have exceeded your daily food budget. A simpler or home-cooked next meal may help you stay on track.'
     }
 
     if (recentMeals.length === 0) {
-      return '👋 Start by snapping your first meal. GreenBites will help you track calories and spending.'
+      return 'Start by scanning your first meal. GreenBites will help you track calories, cost, and smart meal choices.'
     }
 
-    return '✅ You are doing well today. Keep your meals balanced and consistent.'
+    return 'You are doing well today. Keep your meals balanced and consistent.'
   }
 
   const getNextMealSuggestion = () => {
-    if (calories > 1800) {
-      return 'Go for light options: soup, salad, fruits, or grilled chicken.'
+    if (calories > calorieTarget) {
+      return 'Try a light option next: soup, grilled chicken, fruit, or salad with plain water.'
     }
 
-    if (budget > 30) {
-      return 'Choose a lower-cost meal: home-cooked rice, eggs, vegetables, or soup.'
+    if (budget > budgetTarget) {
+      return 'Consider a lower-cost option next: rice, eggs, vegetables, soup, or another simple home meal.'
     }
 
-    return 'Balanced meal idea: rice + protein + vegetables + plain water.'
+    return 'A balanced next meal could be protein, vegetables, a moderate carb portion, and plain water.'
   }
 
   const today = new Date().toLocaleDateString('en-MY', {
@@ -137,30 +140,27 @@ export default function Home() {
   })
 
   return (
-    <div className="page page-pro">
+    <div className="page-pro">
       <div className="topbar">
-        <div>
-          <div className="brand-pill">GreenBites</div>
-          <h1 className="dashboard-title">Good evening</h1>
-          <p className="dashboard-subtitle">
-            {today} • Track smarter, eat better.
-          </p>
-        </div>
+        <div className="brand-pill">GreenBites</div>
+        <h1 className="dashboard-title">Good Evening</h1>
+        <p className="dashboard-subtitle">
+          {today} • Track smarter, eat better.
+        </p>
       </div>
 
       <div className="hero-summary">
-        <div className="hero-summary-left">
-          <h2>Today Summary</h2>
-          <p className="hero-summary-text">
-            {recentMeals.length} meals logged today
-          </p>
-        </div>
+        <h2>Today Summary</h2>
+        <p className="hero-summary-text">
+          {recentMeals.length} meals logged today
+        </p>
 
         <div className="hero-summary-stats">
           <div className="hero-stat">
             <span className="hero-stat-label">Calories</span>
             <strong>{calories}</strong>
           </div>
+
           <div className="hero-stat">
             <span className="hero-stat-label">Spent</span>
             <strong>RM {budget}</strong>
@@ -184,8 +184,10 @@ export default function Home() {
             <span>Calories</span>
             <span>{getPercentLabel(caloriePercentRaw)}</span>
           </div>
-          <div className="metric-value">{calories} / 1800 kcal</div>
-          <div className="progress-track modern">
+          <div className="metric-value">
+            {calories} / {calorieTarget} kcal
+          </div>
+          <div className="progress-track">
             <div
               className={`progress-fill ${
                 calorieStatus === 'danger'
@@ -204,8 +206,10 @@ export default function Home() {
             <span>Budget</span>
             <span>{getPercentLabel(budgetPercentRaw)}</span>
           </div>
-          <div className="metric-value">RM {budget} / RM 30</div>
-          <div className="progress-track modern">
+          <div className="metric-value">
+            RM {budget} / RM {budgetTarget}
+          </div>
+          <div className="progress-track">
             <div
               className={`progress-fill ${
                 budgetStatus === 'danger'
@@ -242,23 +246,21 @@ export default function Home() {
 
       <div className="card section-card">
         <div className="section-head">
-          <div>
-            <h2>Quick Actions</h2>
-            <p>Snap now or upload from your gallery.</p>
-          </div>
+          <h2>Quick Actions</h2>
+          <p>Scan or upload a meal to get instant insights.</p>
         </div>
 
         <div className="action-column">
           <button className="snap-button" onClick={handleOpenCamera}>
-            📸 Snap Pic
+            📸 Scan Meal
           </button>
 
-          <button className="secondary-full-button" onClick={handleOpenGallery}>
-            🖼️ Upload dari Galeri
+          <button className="secondary-button" onClick={handleOpenGallery}>
+            🖼️ Choose from Gallery
           </button>
 
           <button className="reset-button" onClick={handleReset}>
-            🔄 Reset Today
+            Reset Today
           </button>
         </div>
       </div>
@@ -283,23 +285,23 @@ export default function Home() {
       {recentMeals.length === 0 && (
         <div className="card empty-state-card">
           <div className="empty-icon">🍽️</div>
-          <h3>No meals yet</h3>
-          <p>Start by snapping your first meal and build today’s summary.</p>
+          <h3>No meals logged yet</h3>
+          <p>
+            Start by scanning your first meal to build your daily summary.
+          </p>
         </div>
       )}
 
       {recentMeals.length > 0 && (
         <div className="card section-card">
           <div className="section-head">
-            <div>
-              <h2>Recent Meals</h2>
-              <p>Your latest logged meals</p>
-            </div>
+            <h2>Recent Meals</h2>
+            <p>Your latest logged meals</p>
           </div>
 
           <div className="recent-list">
             {recentMeals.map((meal, index) => (
-              <div key={index} className="meal-item pro-meal-item">
+              <div key={index} className="pro-meal-item">
                 <img
                   src={meal.image_url}
                   alt={meal.meal_name}
