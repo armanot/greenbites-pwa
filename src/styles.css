@@ -215,3 +215,64 @@ body {
   background: white;
   cursor: pointer;
 }
+.hero-card {
+  padding-top: 18px;
+}
+
+.hero-text {
+  margin: 0;
+  color: #355244;
+}
+
+.focus-card p {
+  margin-bottom: 0;
+  color: #355244;
+  line-height: 1.5;
+}
+
+.muted-text {
+  margin-top: 8px;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.progress-track {
+  width: 100%;
+  height: 12px;
+  background: #dfe7df;
+  border-radius: 999px;
+  margin-top: 14px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 999px;
+}
+
+.green-fill {
+  background: linear-gradient(90deg, #22c55e, #16a34a);
+}
+
+.orange-fill {
+  background: linear-gradient(90deg, #f59e0b, #ea580c);
+}
+
+.action-column {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.secondary-full-button {
+  width: 100%;
+  border: 2px solid #16a34a;
+  border-radius: 999px;
+  padding: 18px 20px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #16a34a;
+  background: white;
+  cursor: pointer;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.05);
+}

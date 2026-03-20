@@ -14,45 +14,59 @@ export default function Home() {
     galleryInputRef.current?.click()
   }
 
-  const handleImageSelected = (e) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+  const handleImageSelected = async (e) => {
+  const file = e.target.files?.[0]
+  if (!file) return
 
-    const imageUrl = URL.createObjectURL(file)
-    sessionStorage.setItem('greenbites_uploaded_image', imageUrl)
-    sessionStorage.setItem('greenbites_uploaded_image_name', file.name)
+  const imageUrl = URL.createObjectURL(file)
 
-    navigate('/scanning')
-  }
+  sessionStorage.setItem('greenbites_uploaded_image', imageUrl)
+  sessionStorage.setItem('greenbites_uploaded_image_name', file.name)
+
+  // simpan maklumat file untuk flow seterusnya
+  window.greenbitesSelectedFile = file
+
+  navigate('/scanning')
+}
 
   return (
     <div className="page">
-      <div className="card">
+      <div className="card hero-card">
         <div className="brand">GreenBites</div>
         <h1>Dashboard Harian</h1>
-        <p>Pantau kalori, bajet makanan dan berat badan dalam satu skrin.</p>
+        <p className="hero-text">
+          Pantau kalori, bajet makanan dan berat badan dalam satu skrin.
+        </p>
       </div>
 
       <div className="card">
         <h3>Kalori hari ini</h3>
         <div className="value">1180 / 1800 kcal</div>
+        <div className="progress-track">
+          <div className="progress-fill green-fill" style={{ width: '66%' }} />
+        </div>
       </div>
 
       <div className="card">
         <h3>Bajet hari ini</h3>
         <div className="value">RM 22 / RM 30</div>
+        <div className="progress-track">
+          <div className="progress-fill orange-fill" style={{ width: '73%' }} />
+        </div>
       </div>
 
       <div className="card">
         <h3>Berat semasa</h3>
         <div className="value">78.4 kg</div>
+        <div className="muted-text">Kemaskini mingguan</div>
       </div>
 
-      <div className="card">
+      <div className="card focus-card">
         <h2>Fokus malam ini</h2>
         <p>
-          Pilih sama ada ambil gambar makanan sekarang atau upload dari galeri
-          telefon.
+          Ambil gambar makanan terus, atau upload gambar yang telah disimpan
+          dalam telefon. GreenBites akan tunjukkan anggaran kalori, kos dan
+          cadangan ringkas sebelum makan.
         </p>
       </div>
 

@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { uploadMealImage } from '../lib/uploadMealImage'
+import { saveMealLog } from '../lib/saveMealLog'
 
 const sampleMeals = [
   {
@@ -59,7 +61,25 @@ export default function SnapResult() {
     navigate('/')
   }
 
-  const handleLogMeal = () => {
+ const handleLogMeal = async () => {
+  try {
+    const file = window.greenbitesSelectedFile
+
+    if (!file) {
+      alert('Tiada fail gambar ditemui.')
+      return
+    }
+
+    const uploadedImageUrl = await uploadMealImage(file)
+
+    await saveMealLog({
+      image_url: uploadedImageUrl,
+      meal_name: mealData.name,
+      calories: mealData.calories,
+      cost: mealData.cost,
+      impact: mealData.impact,
+    })
+
     const currentCalories = Number(
       localStorage.getItem('greenbites_today_calories') || 1180
     )
@@ -76,9 +96,13 @@ export default function SnapResult() {
       currentBudget + mealData.cost
     )
 
-    alert('Meal logged successfully.')
+    alert('Meal logged to Supabase successfully.')
     navigate('/')
+  } catch (err) {
+    console.error(err)
+    alert(`Error: ${err.message}`)
   }
+}
 
   return (
     <div className="page">
