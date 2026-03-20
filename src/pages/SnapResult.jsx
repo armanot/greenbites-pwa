@@ -43,6 +43,8 @@ export default function SnapResult() {
   const navigate = useNavigate()
   const [imageUrl, setImageUrl] = useState('')
   const [mealData, setMealData] = useState(sampleMeals[0])
+  const [showSuccess, setShowSuccess] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
 
   useEffect(() => {
     const storedImage = sessionStorage.getItem('greenbites_uploaded_image')
@@ -58,68 +60,71 @@ export default function SnapResult() {
   const handleRetake = () => {
     sessionStorage.removeItem('greenbites_uploaded_image')
     sessionStorage.removeItem('greenbites_uploaded_image_name')
+    window.greenbitesSelectedFile = null
     navigate('/')
   }
 
- const handleLogMeal = async () => {
-  try {
-    const file = window.greenbitesSelectedFile
+  const handleLogMeal = async () => {
+    try {
+      setIsSaving(true)
 
-    if (!file) {
-      alert('Tiada fail gambar ditemui.')
-      return
+      const file = window.greenbitesSelectedFile
+      if (!file) {
+        alert('Tiada fail gambar ditemui.')
+        setIsSaving(false)
+        return
+      }
+
+      const uploadedImageUrl = await uploadMealImage(file)
+
+      const mealRecord = {
+        image_url: uploadedImageUrl,
+        meal_name: mealData.name,
+        calories: mealData.calories,
+        cost: mealData.cost,
+        impact: mealData.impact,
+        created_at: new Date().toISOString(),
+      }
+
+      await saveMealLog(mealRecord)
+
+      const currentCalories = Number(
+        localStorage.getItem('greenbites_today_calories') || 0
+      )
+      const currentBudget = Number(
+        localStorage.getItem('greenbites_today_budget') || 0
+      )
+
+      localStorage.setItem(
+        'greenbites_today_calories',
+        currentCalories + mealData.calories
+      )
+      localStorage.setItem(
+        'greenbites_today_budget',
+        currentBudget + mealData.cost
+      )
+
+      const existingMeals = JSON.parse(
+        localStorage.getItem('greenbites_recent_meals') || '[]'
+      )
+      const updatedMeals = [mealRecord, ...existingMeals].slice(0, 5)
+
+      localStorage.setItem(
+        'greenbites_recent_meals',
+        JSON.stringify(updatedMeals)
+      )
+
+      setShowSuccess(true)
+
+      setTimeout(() => {
+        navigate('/')
+      }, 1200)
+    } catch (err) {
+      console.error(err)
+      alert(`Error: ${err.message}`)
+      setIsSaving(false)
     }
-
-    const uploadedImageUrl = await uploadMealImage(file)
-
-    const mealRecord = {
-      image_url: uploadedImageUrl,
-      meal_name: mealData.name,
-      calories: mealData.calories,
-      cost: mealData.cost,
-      impact: mealData.impact,
-      created_at: new Date().toISOString(),
-    }
-
-    await saveMealLog(mealRecord)
-
-    // 👉 UPDATE TOTAL
-    const currentCalories = Number(
-      localStorage.getItem('greenbites_today_calories') || 0
-    )
-    const currentBudget = Number(
-      localStorage.getItem('greenbites_today_budget') || 0
-    )
-
-    localStorage.setItem(
-      'greenbites_today_calories',
-      currentCalories + mealData.calories
-    )
-
-    localStorage.setItem(
-      'greenbites_today_budget',
-      currentBudget + mealData.cost
-    )
-
-    // 👉 SAVE RECENT MEALS
-    const existingMeals = JSON.parse(
-      localStorage.getItem('greenbites_recent_meals') || '[]'
-    )
-
-    const updatedMeals = [mealRecord, ...existingMeals].slice(0, 5)
-
-    localStorage.setItem(
-      'greenbites_recent_meals',
-      JSON.stringify(updatedMeals)
-    )
-
-    alert('Meal berjaya disimpan ✅')
-    navigate('/')
-  } catch (err) {
-    console.error(err)
-    alert(`Error: ${err.message}`)
   }
-}
 
   return (
     <div className="page">
@@ -178,10 +183,21 @@ export default function SnapResult() {
         <button className="secondary-button" onClick={handleRetake}>
           Retake
         </button>
-        <button className="snap-button half-button" onClick={handleLogMeal}>
-          Log Meal
+
+        <button
+          className="snap-button half-button"
+          onClick={handleLogMeal}
+          disabled={isSaving}
+        >
+          {isSaving ? 'Saving...' : 'Log Meal'}
         </button>
       </div>
+
+      {showSuccess && (
+        <div className="toast-success">
+          ✅ Meal berjaya disimpan
+        </div>
+      )}
     </div>
   )
 }

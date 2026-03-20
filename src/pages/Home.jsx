@@ -11,19 +11,28 @@ export default function Home() {
   const [recentMeals, setRecentMeals] = useState([])
 
   useEffect(() => {
-    const storedCalories = Number(
-      localStorage.getItem('greenbites_today_calories') || 0
-    )
-    const storedBudget = Number(
-      localStorage.getItem('greenbites_today_budget') || 0
-    )
-    const storedMeals = JSON.parse(
-      localStorage.getItem('greenbites_recent_meals') || '[]'
-    )
+    const loadDashboardData = () => {
+      const storedCalories = Number(
+        localStorage.getItem('greenbites_today_calories') || 0
+      )
+      const storedBudget = Number(
+        localStorage.getItem('greenbites_today_budget') || 0
+      )
+      const storedMeals = JSON.parse(
+        localStorage.getItem('greenbites_recent_meals') || '[]'
+      )
 
-    setCalories(storedCalories)
-    setBudget(storedBudget)
-    setRecentMeals(storedMeals)
+      setCalories(storedCalories)
+      setBudget(storedBudget)
+      setRecentMeals(storedMeals)
+    }
+
+    loadDashboardData()
+    window.addEventListener('focus', loadDashboardData)
+
+    return () => {
+      window.removeEventListener('focus', loadDashboardData)
+    }
   }, [])
 
   const handleOpenCamera = () => {
@@ -61,6 +70,13 @@ export default function Home() {
         </p>
       </div>
 
+      <div className="card summary-card">
+        <h2>Today Summary</h2>
+        <p>{recentMeals.length} meals logged</p>
+        <p>{calories} kcal consumed</p>
+        <p>RM {budget} spent</p>
+      </div>
+
       <div className="card">
         <h3>Kalori hari ini</h3>
         <div className="value">{calories} / 1800 kcal</div>
@@ -90,7 +106,7 @@ export default function Home() {
       </div>
 
       <div className="card focus-card">
-        <h2>Fokus</h2>
+        <h2>Fokus malam ini</h2>
         <p>
           Ambil gambar makanan terus, atau upload gambar yang telah disimpan
           dalam telefon. GreenBites akan tunjukkan anggaran kalori, kos dan
@@ -124,6 +140,13 @@ export default function Home() {
         onChange={handleImageSelected}
         style={{ display: 'none' }}
       />
+
+      {recentMeals.length === 0 && (
+        <div className="card">
+          <h3>No meals yet</h3>
+          <p>Start by snapping your first meal 🍽️</p>
+        </div>
+      )}
 
       {recentMeals.length > 0 && (
         <div className="card">
