@@ -32,21 +32,28 @@ export default function ScanningScreen() {
 
         setStep(2)
 
-        const response = await fetch('/api/analyze-meal', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            imageBase64,
-            mimeType: file.type || 'image/jpeg',
-          }),
-        })
+     const response = await fetch('/api/analyze-meal', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                imageBase64,
+                mimeType: file.type || 'image/jpeg',
+            }),
+            })
 
-        const data = await response.json()
+        let data = {}
+        const text = await response.text()
+
+        try {
+        data = text ? JSON.parse(text) : {}
+        } catch {
+        data = { error: text || 'Invalid server response' }
+        }
 
         if (!response.ok) {
-          throw new Error(data.error || 'Analysis failed')
+        throw new Error(data.error || `Analysis failed (${response.status})`)
         }
 
         if (cancelled) return
