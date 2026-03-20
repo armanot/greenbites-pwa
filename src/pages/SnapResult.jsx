@@ -1,72 +1,71 @@
-import SummaryCard from '../components/SummaryCard'
-import SuggestionList from '../components/SuggestionList'
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
-function SnapResult({ meal, dailyLog, onBack, onLogMeal }) {
-  const projectedCalories = dailyLog.calories + meal.calories
-  const projectedBudget = +(dailyLog.budget + meal.cost).toFixed(2)
+export default function SnapResult() {
+  const navigate = useNavigate()
+  const [imageUrl, setImageUrl] = useState('')
+
+  useEffect(() => {
+    const storedImage = sessionStorage.getItem('greenbites_uploaded_image')
+    if (storedImage) {
+      setImageUrl(storedImage)
+    }
+  }, [])
 
   return (
-    <main className="screen no-pad">
-      <header className="topbar">
-        <button className="icon-btn" onClick={onBack}>←</button>
-        <h2>Snap Result</h2>
-        <div style={{ width: 40 }} />
-      </header>
+    <div className="page">
+      <button className="back-link" onClick={() => navigate('/')}>
+        ← Kembali
+      </button>
 
-      <img className="meal-image" src={meal.image} alt={meal.name} />
+      <div className="card">
+        <div className="brand">GreenBites</div>
+        <h1>Analisis Makanan</h1>
+        <p>Ini ialah paparan awal selepas gambar diambil.</p>
+      </div>
 
-      <section className="content">
-        <div className="meal-title-wrap">
-          <h1>{meal.name}</h1>
-          <p className="muted">Anggaran berdasarkan imej dan saiz hidangan standard.</p>
+      <div className="card">
+        {imageUrl ? (
+          <img
+            src={imageUrl}
+            alt="Makanan yang diambil"
+            className="meal-preview"
+          />
+        ) : (
+          <div className="meal-placeholder">Tiada gambar dipilih</div>
+        )}
+      </div>
+
+      <div className="stats-grid">
+        <div className="stat-card danger">
+          <div className="stat-title">Kalori</div>
+          <div className="stat-value">680 kcal</div>
+          <div className="stat-note">Above Target</div>
         </div>
 
-        <div className="summary-grid">
-          <SummaryCard
-            icon="🔥"
-            value={`${meal.calories}`}
-            label="Kalori"
-            helper={meal.calorieStatus}
-            tone="red"
-          />
-          <SummaryCard
-            icon="💸"
-            value={`RM ${meal.cost}`}
-            label="Kos"
-            helper={meal.budgetStatus}
-            tone="orange"
-          />
-          <SummaryCard
-            icon="⚖️"
-            value="Impact"
-            label="Berat"
-            helper={meal.weightImpact}
-            tone="green"
-          />
+        <div className="stat-card warning">
+          <div className="stat-title">Kos</div>
+          <div className="stat-value">RM 12</div>
+          <div className="stat-note">Within Budget</div>
         </div>
 
-        <div className="panel compact">
-          <h3>Ringkasan selepas log</h3>
-          <div className="mini-stats">
-            <div>
-              <span>Kalori harian</span>
-              <strong>{projectedCalories} kcal</strong>
-            </div>
-            <div>
-              <span>Bajet harian</span>
-              <strong>RM {projectedBudget}</strong>
-            </div>
-          </div>
+        <div className="stat-card success">
+          <div className="stat-title">Impak</div>
+          <div className="stat-value">Berat</div>
+          <div className="stat-note">Weight Gain Likely</div>
         </div>
+      </div>
 
-        <SuggestionList items={meal.suggestions} />
+      <div className="card">
+        <h2>Cadangan</h2>
+        <ul className="suggestion-list">
+          <li>Kurangkan nasi sedikit</li>
+          <li>Elakkan air manis</li>
+          <li>Tambah sayur jika ada</li>
+        </ul>
+      </div>
 
-        <button className="primary-btn" onClick={onLogMeal}>
-          Log Meal
-        </button>
-      </section>
-    </main>
+      <button className="snap-button">Log Meal</button>
+    </div>
   )
 }
-
-export default SnapResult

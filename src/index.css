@@ -1,16 +1,8 @@
-* {
-  box-sizing: border-box;
-}
-
 body {
   margin: 0;
   font-family: Arial, sans-serif;
   background: #eef5ee;
   color: #173a24;
-}
-
-#root {
-  min-height: 100vh;
 }
 
 .page {
@@ -23,11 +15,10 @@ body {
   color: #18a34a;
   font-weight: 700;
   margin-bottom: 10px;
-  font-size: 18px;
 }
 
 .card {
-  background: #ffffff;
+  background: #fff;
   border-radius: 22px;
   padding: 20px;
   margin-bottom: 16px;
