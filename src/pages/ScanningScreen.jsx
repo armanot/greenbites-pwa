@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { fileToBase64 } from '../lib/fileToBase64'
 
 export default function ScanningScreen() {
   const navigate = useNavigate()
   const [step, setStep] = useState(0)
+  const [error, setError] = useState('')
 
   const scanSteps = [
     'Photo received',
@@ -13,15 +15,59 @@ export default function ScanningScreen() {
   ]
 
   useEffect(() => {
-    const stepTimers = [
-      setTimeout(() => setStep(1), 500),
-      setTimeout(() => setStep(2), 1000),
-      setTimeout(() => setStep(3), 1500),
-      setTimeout(() => navigate('/snap-result'), 2200),
-    ]
+    let cancelled = false
+
+    const runAnalysis = async () => {
+      try {
+        const file = window.greenbitesSelectedFile
+
+        if (!file) {
+          throw new Error('No selected image found')
+        }
+
+        setStep(1)
+
+        const imageBase64 = await fileToBase64(file)
+        if (cancelled) return
+
+        setStep(2)
+
+        const response = await fetch('/api/analyze-meal', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            imageBase64,
+            mimeType: file.type || 'image/jpeg',
+          }),
+        })
+
+        const data = await response.json()
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Analysis failed')
+        }
+
+        if (cancelled) return
+
+        setStep(3)
+
+        sessionStorage.setItem('greenbites_ai_result', JSON.stringify(data))
+
+        setTimeout(() => {
+          navigate('/snap-result')
+        }, 500)
+      } catch (err) {
+        console.error(err)
+        setError(err.message || 'Analysis failed')
+      }
+    }
+
+    runAnalysis()
 
     return () => {
-      stepTimers.forEach(clearTimeout)
+      cancelled = true
     }
   }, [navigate])
 
@@ -61,6 +107,12 @@ export default function ScanningScreen() {
             </div>
           ))}
         </div>
+
+        {error && (
+          <div style={{ marginTop: 16, color: '#b91c1c', fontWeight: 600 }}>
+            {error}
+          </div>
+        )}
       </div>
     </div>
   )
