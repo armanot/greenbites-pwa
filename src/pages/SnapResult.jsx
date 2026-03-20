@@ -72,31 +72,48 @@ export default function SnapResult() {
 
     const uploadedImageUrl = await uploadMealImage(file)
 
-    await saveMealLog({
+    const mealRecord = {
       image_url: uploadedImageUrl,
       meal_name: mealData.name,
       calories: mealData.calories,
       cost: mealData.cost,
       impact: mealData.impact,
-    })
+      created_at: new Date().toISOString(),
+    }
 
+    await saveMealLog(mealRecord)
+
+    // 👉 UPDATE TOTAL
     const currentCalories = Number(
-      localStorage.getItem('greenbites_today_calories') || 1180
+      localStorage.getItem('greenbites_today_calories') || 0
     )
     const currentBudget = Number(
-      localStorage.getItem('greenbites_today_budget') || 22
+      localStorage.getItem('greenbites_today_budget') || 0
     )
 
     localStorage.setItem(
       'greenbites_today_calories',
       currentCalories + mealData.calories
     )
+
     localStorage.setItem(
       'greenbites_today_budget',
       currentBudget + mealData.cost
     )
 
-    alert('Meal logged to Supabase successfully.')
+    // 👉 SAVE RECENT MEALS
+    const existingMeals = JSON.parse(
+      localStorage.getItem('greenbites_recent_meals') || '[]'
+    )
+
+    const updatedMeals = [mealRecord, ...existingMeals].slice(0, 5)
+
+    localStorage.setItem(
+      'greenbites_recent_meals',
+      JSON.stringify(updatedMeals)
+    )
+
+    alert('Meal berjaya disimpan ✅')
     navigate('/')
   } catch (err) {
     console.error(err)

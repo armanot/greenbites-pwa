@@ -276,3 +276,29 @@ body {
   cursor: pointer;
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.05);
 }
+.meal-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.meal-thumb {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+.meal-info {
+  flex: 1;
+}
+
+.meal-name {
+  font-weight: 700;
+}
+
+.meal-meta {
+  font-size: 14px;
+  color: #6b7280;
+}

@@ -1,10 +1,30 @@
-import { useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 export default function Home() {
   const cameraInputRef = useRef(null)
   const galleryInputRef = useRef(null)
   const navigate = useNavigate()
+
+  const [calories, setCalories] = useState(0)
+  const [budget, setBudget] = useState(0)
+  const [recentMeals, setRecentMeals] = useState([])
+
+  useEffect(() => {
+    const storedCalories = Number(
+      localStorage.getItem('greenbites_today_calories') || 0
+    )
+    const storedBudget = Number(
+      localStorage.getItem('greenbites_today_budget') || 0
+    )
+    const storedMeals = JSON.parse(
+      localStorage.getItem('greenbites_recent_meals') || '[]'
+    )
+
+    setCalories(storedCalories)
+    setBudget(storedBudget)
+    setRecentMeals(storedMeals)
+  }, [])
 
   const handleOpenCamera = () => {
     cameraInputRef.current?.click()
@@ -14,20 +34,22 @@ export default function Home() {
     galleryInputRef.current?.click()
   }
 
-  const handleImageSelected = async (e) => {
-  const file = e.target.files?.[0]
-  if (!file) return
+  const handleImageSelected = (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
 
-  const imageUrl = URL.createObjectURL(file)
+    const imageUrl = URL.createObjectURL(file)
 
-  sessionStorage.setItem('greenbites_uploaded_image', imageUrl)
-  sessionStorage.setItem('greenbites_uploaded_image_name', file.name)
+    sessionStorage.setItem('greenbites_uploaded_image', imageUrl)
+    sessionStorage.setItem('greenbites_uploaded_image_name', file.name)
 
-  // simpan maklumat file untuk flow seterusnya
-  window.greenbitesSelectedFile = file
+    window.greenbitesSelectedFile = file
 
-  navigate('/scanning')
-}
+    navigate('/scanning')
+  }
+
+  const caloriePercent = Math.min((calories / 1800) * 100, 100)
+  const budgetPercent = Math.min((budget / 30) * 100, 100)
 
   return (
     <div className="page">
@@ -41,17 +63,23 @@ export default function Home() {
 
       <div className="card">
         <h3>Kalori hari ini</h3>
-        <div className="value">1180 / 1800 kcal</div>
+        <div className="value">{calories} / 1800 kcal</div>
         <div className="progress-track">
-          <div className="progress-fill green-fill" style={{ width: '66%' }} />
+          <div
+            className="progress-fill green-fill"
+            style={{ width: `${caloriePercent}%` }}
+          />
         </div>
       </div>
 
       <div className="card">
         <h3>Bajet hari ini</h3>
-        <div className="value">RM 22 / RM 30</div>
+        <div className="value">RM {budget} / RM 30</div>
         <div className="progress-track">
-          <div className="progress-fill orange-fill" style={{ width: '73%' }} />
+          <div
+            className="progress-fill orange-fill"
+            style={{ width: `${budgetPercent}%` }}
+          />
         </div>
       </div>
 
@@ -62,7 +90,7 @@ export default function Home() {
       </div>
 
       <div className="card focus-card">
-        <h2>Fokus malam ini</h2>
+        <h2>Fokus</h2>
         <p>
           Ambil gambar makanan terus, atau upload gambar yang telah disimpan
           dalam telefon. GreenBites akan tunjukkan anggaran kalori, kos dan
@@ -96,6 +124,29 @@ export default function Home() {
         onChange={handleImageSelected}
         style={{ display: 'none' }}
       />
+
+      {recentMeals.length > 0 && (
+        <div className="card">
+          <h2>Recent Meals</h2>
+
+          {recentMeals.map((meal, index) => (
+            <div key={index} className="meal-item">
+              <img
+                src={meal.image_url}
+                alt={meal.meal_name}
+                className="meal-thumb"
+              />
+
+              <div className="meal-info">
+                <div className="meal-name">{meal.meal_name}</div>
+                <div className="meal-meta">
+                  {meal.calories} kcal • RM {meal.cost}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
