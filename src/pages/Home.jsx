@@ -63,8 +63,72 @@ export default function Home() {
     navigate('/scanning')
   }
 
-  const caloriePercent = Math.min((calories / 1800) * 100, 100)
-  const budgetPercent = Math.min((budget / 30) * 100, 100)
+  const handleReset = () => {
+    const confirmed = window.confirm('Reset semua data hari ini?')
+    if (!confirmed) return
+
+    localStorage.removeItem('greenbites_today_calories')
+    localStorage.removeItem('greenbites_today_budget')
+    localStorage.removeItem('greenbites_recent_meals')
+
+    setCalories(0)
+    setBudget(0)
+    setRecentMeals([])
+  }
+
+  const caloriePercentRaw = (calories / 1800) * 100
+  const budgetPercentRaw = (budget / 30) * 100
+
+  const caloriePercent = Math.min(caloriePercentRaw, 100)
+  const budgetPercent = Math.min(budgetPercentRaw, 100)
+
+  const getStatus = (percent) => {
+    if (percent < 70) return 'good'
+    if (percent <= 100) return 'warning'
+    return 'danger'
+  }
+
+  const calorieStatus = getStatus(caloriePercentRaw)
+  const budgetStatus = getStatus(budgetPercentRaw)
+
+  const getPercentLabel = (percent) => {
+    if (percent > 100) {
+      return `+${Math.round(percent - 100)}% OVER`
+    }
+    return `${Math.round(percent)}%`
+  }
+
+  const getCoachMessage = () => {
+    if (calories > 3000) {
+      return '⚠️ You are significantly over your calorie target today. Skip heavy dinner and choose light meals like soup, fruits, or salad.'
+    }
+
+    if (calories > 1800) {
+      return '⚠️ You exceeded your calorie target. Try lighter meals for the rest of the day.'
+    }
+
+    if (budget > 30) {
+      return '💸 You exceeded your food budget today. Consider simpler or home-cooked meals next.'
+    }
+
+    if (recentMeals.length === 0) {
+      return '👋 Start by snapping your first meal. GreenBites will help you track calories and spending.'
+    }
+
+    return '✅ You are doing well today. Keep your meals balanced and consistent.'
+  }
+
+  const getNextMealSuggestion = () => {
+    if (calories > 1800) {
+      return 'Go for light options: soup, salad, fruits, or grilled chicken.'
+    }
+
+    if (budget > 30) {
+      return 'Choose a lower-cost meal: home-cooked rice, eggs, vegetables, or soup.'
+    }
+
+    return 'Balanced meal idea: rice + protein + vegetables + plain water.'
+  }
 
   const today = new Date().toLocaleDateString('en-MY', {
     weekday: 'long',
@@ -78,7 +142,9 @@ export default function Home() {
         <div>
           <div className="brand-pill">GreenBites</div>
           <h1 className="dashboard-title">Good evening</h1>
-          <p className="dashboard-subtitle">{today} • Track smarter, eat better.</p>
+          <p className="dashboard-subtitle">
+            {today} • Track smarter, eat better.
+          </p>
         </div>
       </div>
 
@@ -102,30 +168,52 @@ export default function Home() {
         </div>
       </div>
 
+      <div className="card ai-coach-card">
+        <h2>🧠 AI Coach</h2>
+        <p>{getCoachMessage()}</p>
+      </div>
+
+      <div className="card next-meal-card">
+        <h3>🍽️ Next Meal Suggestion</h3>
+        <p>{getNextMealSuggestion()}</p>
+      </div>
+
       <div className="metrics-grid">
-        <div className="metric-card">
+        <div className={`metric-card ${calorieStatus}`}>
           <div className="metric-header">
             <span>Calories</span>
-            <span>{Math.round(caloriePercent)}%</span>
+            <span>{getPercentLabel(caloriePercentRaw)}</span>
           </div>
           <div className="metric-value">{calories} / 1800 kcal</div>
           <div className="progress-track modern">
             <div
-              className="progress-fill green-fill"
+              className={`progress-fill ${
+                calorieStatus === 'danger'
+                  ? 'red-fill'
+                  : calorieStatus === 'warning'
+                  ? 'orange-fill'
+                  : 'green-fill'
+              }`}
               style={{ width: `${caloriePercent}%` }}
             />
           </div>
         </div>
 
-        <div className="metric-card">
+        <div className={`metric-card ${budgetStatus}`}>
           <div className="metric-header">
             <span>Budget</span>
-            <span>{Math.round(budgetPercent)}%</span>
+            <span>{getPercentLabel(budgetPercentRaw)}</span>
           </div>
           <div className="metric-value">RM {budget} / RM 30</div>
           <div className="progress-track modern">
             <div
-              className="progress-fill orange-fill"
+              className={`progress-fill ${
+                budgetStatus === 'danger'
+                  ? 'red-fill'
+                  : budgetStatus === 'warning'
+                  ? 'orange-fill'
+                  : 'green-fill'
+              }`}
               style={{ width: `${budgetPercent}%` }}
             />
           </div>
@@ -146,7 +234,9 @@ export default function Home() {
             <span>Beta</span>
           </div>
           <div className="metric-value">78 / 100</div>
-          <div className="metric-note">Based on meal pattern and balance</div>
+          <div className="metric-note">
+            Based on meal pattern and balance
+          </div>
         </div>
       </div>
 
@@ -165,6 +255,10 @@ export default function Home() {
 
           <button className="secondary-full-button" onClick={handleOpenGallery}>
             🖼️ Upload dari Galeri
+          </button>
+
+          <button className="reset-button" onClick={handleReset}>
+            🔄 Reset Today
           </button>
         </div>
       </div>
