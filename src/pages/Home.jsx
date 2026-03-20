@@ -18,9 +18,15 @@ export default function Home() {
       const storedBudget = Number(
         localStorage.getItem('greenbites_today_budget') || 0
       )
-      const storedMeals = JSON.parse(
-        localStorage.getItem('greenbites_recent_meals') || '[]'
-      )
+
+      let storedMeals = []
+      try {
+        storedMeals = JSON.parse(
+          localStorage.getItem('greenbites_recent_meals') || '[]'
+        )
+      } catch {
+        storedMeals = []
+      }
 
       setCalories(storedCalories)
       setBudget(storedBudget)
@@ -60,68 +66,107 @@ export default function Home() {
   const caloriePercent = Math.min((calories / 1800) * 100, 100)
   const budgetPercent = Math.min((budget / 30) * 100, 100)
 
+  const today = new Date().toLocaleDateString('en-MY', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  })
+
   return (
-    <div className="page">
-      <div className="card hero-card">
-        <div className="brand">GreenBites</div>
-        <h1>Dashboard Harian</h1>
-        <p className="hero-text">
-          Pantau kalori, bajet makanan dan berat badan dalam satu skrin.
-        </p>
-      </div>
-
-      <div className="card summary-card">
-        <h2>Today Summary</h2>
-        <p>{recentMeals.length} meals logged</p>
-        <p>{calories} kcal consumed</p>
-        <p>RM {budget} spent</p>
-      </div>
-
-      <div className="card">
-        <h3>Kalori hari ini</h3>
-        <div className="value">{calories} / 1800 kcal</div>
-        <div className="progress-track">
-          <div
-            className="progress-fill green-fill"
-            style={{ width: `${caloriePercent}%` }}
-          />
+    <div className="page page-pro">
+      <div className="topbar">
+        <div>
+          <div className="brand-pill">GreenBites</div>
+          <h1 className="dashboard-title">Good evening</h1>
+          <p className="dashboard-subtitle">{today} • Track smarter, eat better.</p>
         </div>
       </div>
 
-      <div className="card">
-        <h3>Bajet hari ini</h3>
-        <div className="value">RM {budget} / RM 30</div>
-        <div className="progress-track">
-          <div
-            className="progress-fill orange-fill"
-            style={{ width: `${budgetPercent}%` }}
-          />
+      <div className="hero-summary">
+        <div className="hero-summary-left">
+          <h2>Today Summary</h2>
+          <p className="hero-summary-text">
+            {recentMeals.length} meals logged today
+          </p>
+        </div>
+
+        <div className="hero-summary-stats">
+          <div className="hero-stat">
+            <span className="hero-stat-label">Calories</span>
+            <strong>{calories}</strong>
+          </div>
+          <div className="hero-stat">
+            <span className="hero-stat-label">Spent</span>
+            <strong>RM {budget}</strong>
+          </div>
         </div>
       </div>
 
-      <div className="card">
-        <h3>Berat semasa</h3>
-        <div className="value">78.4 kg</div>
-        <div className="muted-text">Kemaskini mingguan</div>
+      <div className="metrics-grid">
+        <div className="metric-card">
+          <div className="metric-header">
+            <span>Calories</span>
+            <span>{Math.round(caloriePercent)}%</span>
+          </div>
+          <div className="metric-value">{calories} / 1800 kcal</div>
+          <div className="progress-track modern">
+            <div
+              className="progress-fill green-fill"
+              style={{ width: `${caloriePercent}%` }}
+            />
+          </div>
+        </div>
+
+        <div className="metric-card">
+          <div className="metric-header">
+            <span>Budget</span>
+            <span>{Math.round(budgetPercent)}%</span>
+          </div>
+          <div className="metric-value">RM {budget} / RM 30</div>
+          <div className="progress-track modern">
+            <div
+              className="progress-fill orange-fill"
+              style={{ width: `${budgetPercent}%` }}
+            />
+          </div>
+        </div>
+
+        <div className="metric-card">
+          <div className="metric-header">
+            <span>Weight</span>
+            <span>Weekly</span>
+          </div>
+          <div className="metric-value">78.4 kg</div>
+          <div className="metric-note">Last updated this week</div>
+        </div>
+
+        <div className="metric-card">
+          <div className="metric-header">
+            <span>Health Score</span>
+            <span>Beta</span>
+          </div>
+          <div className="metric-value">78 / 100</div>
+          <div className="metric-note">Based on meal pattern and balance</div>
+        </div>
       </div>
 
-      <div className="card focus-card">
-        <h2>Fokus malam ini</h2>
-        <p>
-          Ambil gambar makanan terus, atau upload gambar yang telah disimpan
-          dalam telefon. GreenBites akan tunjukkan anggaran kalori, kos dan
-          cadangan ringkas sebelum makan.
-        </p>
-      </div>
+      <div className="card section-card">
+        <div className="section-head">
+          <div>
+            <h2>Quick Actions</h2>
+            <p>Snap now or upload from your gallery.</p>
+          </div>
+        </div>
 
-      <div className="action-column">
-        <button className="snap-button" onClick={handleOpenCamera}>
-          📸 Ambil Gambar
-        </button>
+        <div className="action-column">
+          <button className="snap-button" onClick={handleOpenCamera}>
+            📸 Ambil Gambar
+          </button>
 
-        <button className="secondary-full-button" onClick={handleOpenGallery}>
-          🖼️ Upload dari Galeri
-        </button>
+          <button className="secondary-full-button" onClick={handleOpenGallery}>
+            🖼️ Upload dari Galeri
+          </button>
+        </div>
       </div>
 
       <input
@@ -142,32 +187,44 @@ export default function Home() {
       />
 
       {recentMeals.length === 0 && (
-        <div className="card">
+        <div className="card empty-state-card">
+          <div className="empty-icon">🍽️</div>
           <h3>No meals yet</h3>
-          <p>Start by snapping your first meal 🍽️</p>
+          <p>Start by snapping your first meal and build today’s summary.</p>
         </div>
       )}
 
       {recentMeals.length > 0 && (
-        <div className="card">
-          <h2>Recent Meals</h2>
+        <div className="card section-card">
+          <div className="section-head">
+            <div>
+              <h2>Recent Meals</h2>
+              <p>Your latest logged meals</p>
+            </div>
+          </div>
 
-          {recentMeals.map((meal, index) => (
-            <div key={index} className="meal-item">
-              <img
-                src={meal.image_url}
-                alt={meal.meal_name}
-                className="meal-thumb"
-              />
+          <div className="recent-list">
+            {recentMeals.map((meal, index) => (
+              <div key={index} className="meal-item pro-meal-item">
+                <img
+                  src={meal.image_url}
+                  alt={meal.meal_name}
+                  className="meal-thumb"
+                />
 
-              <div className="meal-info">
-                <div className="meal-name">{meal.meal_name}</div>
-                <div className="meal-meta">
-                  {meal.calories} kcal • RM {meal.cost}
+                <div className="meal-info">
+                  <div className="meal-name">{meal.meal_name}</div>
+                  <div className="meal-meta">
+                    {meal.calories} kcal • RM {meal.cost}
+                  </div>
+                </div>
+
+                <div className="meal-badge">
+                  {meal.impact || 'Tracked'}
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       )}
     </div>
