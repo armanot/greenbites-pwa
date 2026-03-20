@@ -2,14 +2,19 @@ import { useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 export default function Home() {
-  const fileInputRef = useRef(null)
+  const cameraInputRef = useRef(null)
+  const galleryInputRef = useRef(null)
   const navigate = useNavigate()
 
   const handleOpenCamera = () => {
-    fileInputRef.current?.click()
+    cameraInputRef.current?.click()
   }
 
-  const handleSnap = (e) => {
+  const handleOpenGallery = () => {
+    galleryInputRef.current?.click()
+  }
+
+  const handleImageSelected = (e) => {
     const file = e.target.files?.[0]
     if (!file) return
 
@@ -46,21 +51,35 @@ export default function Home() {
       <div className="card">
         <h2>Fokus malam ini</h2>
         <p>
-          Cuba aliran paling ringkas: tekan butang di bawah, ambil gambar makanan,
-          dan lihat paparan cadangan sebelum makan.
+          Pilih sama ada ambil gambar makanan sekarang atau upload dari galeri
+          telefon.
         </p>
       </div>
 
-      <button className="snap-button" onClick={handleOpenCamera}>
-        📸 Snap Meal
-      </button>
+      <div className="action-column">
+        <button className="snap-button" onClick={handleOpenCamera}>
+          📸 Ambil Gambar
+        </button>
+
+        <button className="secondary-full-button" onClick={handleOpenGallery}>
+          🖼️ Upload dari Galeri
+        </button>
+      </div>
 
       <input
-        ref={fileInputRef}
+        ref={cameraInputRef}
         type="file"
         accept="image/*"
         capture="environment"
-        onChange={handleSnap}
+        onChange={handleImageSelected}
+        style={{ display: 'none' }}
+      />
+
+      <input
+        ref={galleryInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleImageSelected}
         style={{ display: 'none' }}
       />
     </div>
