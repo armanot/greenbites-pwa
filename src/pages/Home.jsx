@@ -160,7 +160,7 @@ export default function Home() {
 
         <div className="action-column">
           <button className="snap-button" onClick={handleOpenCamera}>
-            📸 Snap
+            📸 Snap Pic
           </button>
 
           <button className="secondary-full-button" onClick={handleOpenGallery}>
