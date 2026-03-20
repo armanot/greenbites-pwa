@@ -9,6 +9,7 @@ const sampleMeals = [
     calories: 680,
     cost: 12,
     impact: 'Weight Gain Likely',
+    confidence: 'High confidence',
     suggestions: [
       'Kurangkan nasi sedikit',
       'Elakkan air manis',
@@ -20,6 +21,7 @@ const sampleMeals = [
     calories: 540,
     cost: 10,
     impact: 'Slightly Above Target',
+    confidence: 'Medium confidence',
     suggestions: [
       'Pilih lauk bakar jika ada',
       'Kurangkan kuah manis',
@@ -31,6 +33,7 @@ const sampleMeals = [
     calories: 620,
     cost: 9,
     impact: 'High Carb Meal',
+    confidence: 'Medium confidence',
     suggestions: [
       'Ambil portion sederhana',
       'Elakkan minuman bergula',
@@ -104,9 +107,15 @@ export default function SnapResult() {
         currentBudget + mealData.cost
       )
 
-      const existingMeals = JSON.parse(
-        localStorage.getItem('greenbites_recent_meals') || '[]'
-      )
+      let existingMeals = []
+      try {
+        existingMeals = JSON.parse(
+          localStorage.getItem('greenbites_recent_meals') || '[]'
+        )
+      } catch {
+        existingMeals = []
+      }
+
       const updatedMeals = [mealRecord, ...existingMeals].slice(0, 5)
 
       localStorage.setItem(
@@ -127,59 +136,95 @@ export default function SnapResult() {
   }
 
   return (
-    <div className="page">
-      <button className="back-link" onClick={() => navigate('/')}>
-        ← Kembali
+    <div className="page page-pro">
+      <button className="back-link pro-back-link" onClick={() => navigate('/')}>
+        ← Back
       </button>
 
-      <div className="card">
-        <div className="brand">GreenBites</div>
-        <h1>Analisis Makanan</h1>
-        <p>Detected meal: {mealData.name}</p>
-      </div>
-
-      <div className="card">
-        {imageUrl ? (
-          <img
-            src={imageUrl}
-            alt="Makanan yang diambil"
-            className="meal-preview"
-          />
-        ) : (
-          <div className="meal-placeholder">Tiada gambar dipilih</div>
-        )}
-      </div>
-
-      <div className="stats-grid">
-        <div className="stat-card danger">
-          <div className="stat-title">Kalori</div>
-          <div className="stat-value">{mealData.calories}</div>
-          <div className="stat-note">Above Target</div>
+      <div className="result-hero-card">
+        <div className="result-hero-top">
+          <div>
+            <div className="brand-pill">GreenBites</div>
+            <h1 className="result-title">Meal Analysis</h1>
+            <p className="result-subtitle">
+              We detected a likely meal match from your uploaded photo.
+            </p>
+          </div>
+          <div className="confidence-badge">{mealData.confidence}</div>
         </div>
 
-        <div className="stat-card warning">
-          <div className="stat-title">Kos</div>
-          <div className="stat-value">RM {mealData.cost}</div>
-          <div className="stat-note">Within Budget</div>
+        <div className="result-image-wrap">
+          {imageUrl ? (
+            <img
+              src={imageUrl}
+              alt="Makanan yang diambil"
+              className="meal-preview pro-meal-preview"
+            />
+          ) : (
+            <div className="meal-placeholder">Tiada gambar dipilih</div>
+          )}
         </div>
 
-        <div className="stat-card success">
-          <div className="stat-title">Impak</div>
-          <div className="stat-value small-text">Berat</div>
-          <div className="stat-note">{mealData.impact}</div>
+        <div className="detected-meal-card">
+          <div className="detected-label">Detected meal</div>
+          <div className="detected-name">{mealData.name}</div>
         </div>
       </div>
 
-      <div className="card">
-        <h2>Cadangan</h2>
-        <ul className="suggestion-list">
+      <div className="result-metrics-grid">
+        <div className="result-metric-card danger-card">
+          <div className="result-metric-label">Calories</div>
+          <div className="result-metric-value">{mealData.calories}</div>
+          <div className="result-metric-note">Above Target</div>
+        </div>
+
+        <div className="result-metric-card warning-card">
+          <div className="result-metric-label">Cost</div>
+          <div className="result-metric-value">RM {mealData.cost}</div>
+          <div className="result-metric-note">Within Budget</div>
+        </div>
+
+        <div className="result-metric-card success-card">
+          <div className="result-metric-label">Impact</div>
+          <div className="result-metric-value impact-text">Berat</div>
+          <div className="result-metric-note">{mealData.impact}</div>
+        </div>
+      </div>
+
+      <div className="card section-card">
+        <div className="section-head">
+          <div>
+            <h2>Smart Suggestions</h2>
+            <p>Simple adjustments to make this meal more balanced.</p>
+          </div>
+        </div>
+
+        <div className="suggestion-modern-list">
           {mealData.suggestions.map((item, index) => (
-            <li key={index}>{item}</li>
+            <div key={index} className="suggestion-modern-item">
+              <div className="suggestion-icon">✓</div>
+              <div className="suggestion-text">{item}</div>
+            </div>
           ))}
-        </ul>
+        </div>
       </div>
 
-      <div className="action-row">
+      <div className="card section-card">
+        <div className="section-head">
+          <div>
+            <h2>Decision Summary</h2>
+            <p>This meal can still fit your day with a few mindful choices.</p>
+          </div>
+        </div>
+
+        <div className="decision-summary-box">
+          This meal is a moderate-to-high calorie option. It remains within a
+          reasonable budget range, but reducing carbohydrates or sugary drinks
+          can improve your daily balance.
+        </div>
+      </div>
+
+      <div className="action-row sticky-action-row">
         <button className="secondary-button" onClick={handleRetake}>
           Retake
         </button>
